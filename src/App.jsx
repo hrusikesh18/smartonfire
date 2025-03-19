@@ -26,7 +26,6 @@ function App() {
         .then(setUserInfo)
         .catch((err) => {
           console.error('Error fetching user info:', err)
-          // If token is invalid, clear it and start over
           sessionStorage.removeItem('access_token')
           setIsAuthenticated(false)
           setAccessToken(null)
@@ -38,7 +37,6 @@ function App() {
     if (launch && iss) {
       initiateLogin()
     } else if (code && state) {
-      // Handle callback with authorization code
       handleCallback(code, state)
         .then(async (tokenData) => {
           setAccessToken(tokenData.access_token)
@@ -68,17 +66,17 @@ function App() {
   }
 
   if (error) {
-    return <div className="error">Error: {error}</div>
+    return <div>Error: {error}</div>
   }
 
   return (
-    <div className="App">
+    <div>
       <h1>SMART on FHIR App</h1>
       {!isAuthenticated ? (
         <button onClick={handleLoginClick}>Login with Cerner</button>
       ) : (
         <div>
-          <div className="user-info">
+          <div>
             <h2>Welcome, {userInfo?.name?.full || `${userInfo?.name?.given || ''} ${userInfo?.name?.family || ''}`.trim() || 'User'}</h2>
             <button onClick={handleLogout}>Logout</button>
           </div>

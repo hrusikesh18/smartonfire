@@ -10,7 +10,6 @@ const fetchSmartConfiguration = async (issUrl) => {
         return await response.json();
     } catch (error) {
         console.error('Error fetching SMART configuration:', error);
-        // Try metadata endpoint as fallback
         return fetchFhirMetadata(issUrl);
     }
 };
@@ -24,7 +23,6 @@ const fetchFhirMetadata = async (issUrl) => {
         }
         const metadata = await response.json();
         
-        // Find the OAuth2 endpoints from the metadata
         const security = metadata.rest?.[0]?.security;
         const extensions = security?.extension?.[0]?.extension || [];
         
