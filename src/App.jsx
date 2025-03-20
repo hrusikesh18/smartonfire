@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 
-import { initiateLogin, handleCallback, getUserInfo } from './utils/smartAuth'
-import PatientDetail from './components/PatientDetail'
+import { initiateLogin, handleCallback, getCurrentPatient } from './utils/smartAuth'
+import Dashboard from './components/Dashboard'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -18,15 +18,15 @@ function App() {
     const state = urlParams.get('state')
 
     // Check if we have a stored token
-    const storedToken = sessionStorage.getItem('access_token')
+    const storedToken = sessionStorage.getItem('smart_token')
     if (storedToken) {
       setAccessToken(storedToken)
       setIsAuthenticated(true)
-      getUserInfo(storedToken)
+      getCurrentPatient()
         .then(setUserInfo)
         .catch((err) => {
           console.error('Error fetching user info:', err)
-          sessionStorage.removeItem('access_token')
+          sessionStorage.removeItem('smart_token')
           setIsAuthenticated(false)
           setAccessToken(null)
         })
@@ -42,7 +42,7 @@ function App() {
           setAccessToken(tokenData.access_token)
           setIsAuthenticated(true)
           try {
-            const userData = await getUserInfo(tokenData.access_token)
+            const userData = await getCurrentPatient()
             setUserInfo(userData)
           } catch (err) {
             console.error('Error fetching user info:', err)
@@ -54,34 +54,21 @@ function App() {
     }
   }, [])
 
-  const handleLoginClick = () => {
-    initiateLogin()
-  }
-
-  const handleLogout = () => {
-    sessionStorage.removeItem('access_token')
-    setIsAuthenticated(false)
-    setUserInfo(null)
-    setAccessToken(null)
-  }
-
   if (error) {
-    return <div>Error: {error}</div>
+    return <div style={{ margin: 0, padding: 0 }}>Error: {error}</div>
   }
 
   return (
-    <div>
-      <h1>SMART on FHIR App</h1>
-      {!isAuthenticated ? (
-        <button onClick={handleLoginClick}>Login with Cerner</button>
+    <div style={{ 
+      margin: 0, 
+      padding: 0,
+      minHeight: '100vh',
+      width: '100%'
+    }}>
+      {isAuthenticated ? (
+        <Dashboard />
       ) : (
-        <div>
-          <div>
-            <h2>Welcome, {userInfo?.name?.full || `${userInfo?.name?.given || ''} ${userInfo?.name?.family || ''}`.trim() || 'User'}</h2>
-            <button onClick={handleLogout}>Logout</button>
-          </div>
-          {accessToken && <PatientDetail />}
-        </div>
+        <div>Please wait while we authenticate...</div>
       )}
     </div>
   )
